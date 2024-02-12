@@ -2,6 +2,12 @@ import { allCategories, categories } from "../services/data/filterData";
 import { appliedIncludes } from "../services/helper-functions/appliedRadioIncludes";
 import { IFilterData } from "../services/helper-functions/interfaces";
 
+export interface applied {
+  category: number;
+  index: number;
+  value: string;
+}
+
 // check if we have a state present in local storage, if we do use that
 const val: IFilterData | null = JSON.parse(localStorage.getItem("filters")!);
 
