@@ -16,9 +16,9 @@ const iniState = {
   category: 0,
   selected: new Array(categories.length).fill(-1),
   showButtons: false,
-  cuisines: [],
-  explore: [],
-  offers: [],
+  cuisines: new Array<number>(),
+  explore: new Array<number>(),
+  offers: new Array<number>(),
   appliedFilters: [],
 };
 
