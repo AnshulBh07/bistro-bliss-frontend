@@ -1,6 +1,7 @@
 import React from "react";
 import styles from "../../sass/filterModalStyles.module.scss";
 import {
+  allCategories,
   categories,
   cost42List,
   cuisinesList,
@@ -8,44 +9,67 @@ import {
   exploreList,
   foodTypeList,
   offersList,
+  paramsList,
   ratings,
   sortTypes,
   typeList,
-  paramsList,
 } from "../../services/data/filterData";
 import { AiOutlineClose } from "react-icons/ai";
-import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "../../store";
-import { useSearchParams } from "react-router-dom";
 import { RadioList } from "./RadioList";
 import { CheckBoxList } from "./CheckBoxList";
+import { useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../../store";
+import { useDispatch } from "react-redux";
+import { useSearchParams } from "react-router-dom";
 
 export const FilterModal: React.FC = () => {
   const dispatch: AppDispatch = useDispatch();
-  const state = useSelector((state: RootState) => state.filter);
-  const { category, showButtons } = state;
-
+  const { category, appliedFilters } = useSelector(
+    (state: RootState) => state.filter
+  );
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // console.log(cuisines);
-  // console.log(offers);
-  // console.log(explore);
-  // logic to handle clear button click
-  const handleClearClick = () => {
-    // clear filter state
-    dispatch({ type: "filter/clear" });
-
-    // clear search params
-    for (let i = 0; i < paramsList.length; i++) {
-      searchParams.delete(paramsList[i]);
-    }
-
-    setSearchParams(searchParams);
-  };
-
-  // logic to set all the filters in search params after apply click
   const handleApplyClick = () => {
     dispatch({ type: "filter/show" });
+
+    // create an array where we will form the query parameter for each param value
+    // this needs to be done because some params are combination of multiple values
+    // e.g. cuisines param
+    // each index in this array represent category parallel to paramsList
+    const helperArr = new Array<string>(9).fill("");
+
+    for (let i = 0; i < appliedFilters.length; i++) {
+      const categoryIndex = appliedFilters[i].category;
+      const valueIndex = appliedFilters[i].index;
+      const value = allCategories.get(categoryIndex)![valueIndex];
+
+      if (value !== null) {
+        helperArr[categoryIndex] += value + ".";
+      }
+    }
+
+    // trim to remove the last ,
+    for (let i = 0; i < 9; i++) {
+      helperArr[i] = helperArr[i].slice(0, helperArr[i].length - 1);
+    }
+
+    // now set these values as params
+    for (let i = 0; i < 9; i++) {
+      if (helperArr[i] !== "") {
+        searchParams.set(paramsList[i], helperArr[i]);
+        setSearchParams(searchParams);
+      }
+    }
+  };
+
+  const handleCloseClick = () => {
+    dispatch({ type: "filter/clear" });
+
+    // clear all search params
+    for (let i = 0; i < paramsList.length; i++) {
+      searchParams.delete(paramsList[i]);
+      setSearchParams(searchParams);
+    }
   };
 
   return (
@@ -62,7 +86,7 @@ export const FilterModal: React.FC = () => {
 
       <div
         className={styles.wrapper}
-        style={{ height: showButtons ? "72%" : "" }}
+        style={{ height: appliedFilters.length > 0 ? "72%" : "" }}
       >
         {/* left category panel */}
         <div className={styles.category_wrapper}>
@@ -83,7 +107,10 @@ export const FilterModal: React.FC = () => {
                       backgroundColor: index === category ? "#f9f9f7" : "",
                     }}
                     onClick={() =>
-                      dispatch({ type: "filter/category", payload: index })
+                      dispatch({
+                        type: "filter/setCategory",
+                        payload: { category: index },
+                      })
                     }
                   >
                     {item}
@@ -177,9 +204,9 @@ export const FilterModal: React.FC = () => {
         )}
       </div>
 
-      {showButtons && (
+      {appliedFilters.length > 0 && (
         <div className={styles.apply_wrapper}>
-          <button className={styles.clear_btn} onClick={handleClearClick}>
+          <button className={styles.clear_btn} onClick={handleCloseClick}>
             clear filters
           </button>
           <button className={styles.apply_btn} onClick={handleApplyClick}>
