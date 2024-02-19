@@ -15,7 +15,6 @@
     "noEmitOnError": true,
     "jsx": "react-jsx",
     "noImplicitAny": false,
-    "types": ["node"],
 
     /* Linting */
     "strict": true,
