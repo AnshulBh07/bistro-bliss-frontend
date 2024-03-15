@@ -23,6 +23,6 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src"],
+  "include": ["src", "../server/services/generateSecretKey.ts"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
