@@ -87,7 +87,7 @@ export interface IToast {
   showToast: boolean;
   message: string;
   status: "success" | "warning" | "error" | "notice";
-  state: "open" | "hide" | "";
+  state: string;
 }
 
 export interface ILinks {
